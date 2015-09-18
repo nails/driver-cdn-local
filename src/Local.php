@@ -4,8 +4,8 @@ namespace Nails\Cdn\Driver;
 
 class Local implements \Nails\Cdn\Interfaces\Driver
 {
-    private $cdn;
-    public $errors;
+    private $oCdn;
+    public $aErrors;
     protected $sBaseUrl;
 
     // --------------------------------------------------------------------------
@@ -16,8 +16,8 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     public function __construct()
     {
         //  Shortcut to CDN
-        $this->cdn    =& get_instance()->cdn;
-        $this->errors = array();
+        $this->oCdn    =& get_instance()->cdn;
+        $this->aErrors = array();
 
         // --------------------------------------------------------------------------
 
@@ -41,22 +41,22 @@ class Local implements \Nails\Cdn\Interfaces\Driver
      * @param  stdClass $data Data to create the object with
      * @return boolean
      */
-    public function object_create($data)
+    public function objectCreate($data)
     {
-        $bucket   = ! empty($data->bucket->slug) ? $data->bucket->slug : '';
-        $filename = ! empty($data->filename)     ? $data->filename     : '';
-        $source   = ! empty($data->file)         ? $data->file         : '';
+        $sBucket   = !empty($data->bucket->slug) ? $data->bucket->slug : '';
+        $sFilename = !empty($data->filename) ? $data->filename : '';
+        $sSource   = !empty($data->file) ? $data->file : '';
 
         // --------------------------------------------------------------------------
 
         //  Check directory exists
-        if (!is_dir(DEPLOY_CDN_PATH . $bucket)) {
+        if (!is_dir(DEPLOY_CDN_PATH . $sBucket)) {
 
             //  Hmm, not writeable, can we create it?
-            if (!@mkdir(DEPLOY_CDN_PATH . $bucket)) {
+            if (!@mkdir(DEPLOY_CDN_PATH . $sBucket)) {
 
                 //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
-                $this->cdn->set_error(lang('cdn_error_target_write_fail_mkdir', DEPLOY_CDN_PATH . $bucket));
+                $this->oCdn->set_error(lang('cdn_error_target_write_fail_mkdir', DEPLOY_CDN_PATH . $sBucket));
                 return false;
             }
         }
@@ -64,29 +64,29 @@ class Local implements \Nails\Cdn\Interfaces\Driver
         // --------------------------------------------------------------------------
 
         //  Check bucket is writeable
-        if (!is_really_writable(DEPLOY_CDN_PATH . $bucket)) {
+        if (!is_really_writable(DEPLOY_CDN_PATH . $sBucket)) {
 
-            $this->cdn->set_error(lang('cdn_error_target_write_fail', DEPLOY_CDN_PATH . $bucket));
+            $this->oCdn->set_error(lang('cdn_error_target_write_fail', DEPLOY_CDN_PATH . $sBucket));
             return false;
         }
 
         // --------------------------------------------------------------------------
 
         //  Move the file
-        $dest = DEPLOY_CDN_PATH . $bucket . '/' . $filename;
+        $sDest = DEPLOY_CDN_PATH . $sBucket . '/' . $sFilename;
 
-        if (@move_uploaded_file($source, $dest)) {
+        if (@move_uploaded_file($sSource, $sDest)) {
 
             return true;
 
         //  Hmm, failed to move, try copying it.
-        } elseif (@copy($source, $dest)) {
+        } elseif (@copy($sSource, $sDest)) {
 
             return true;
 
         } else {
 
-            $this->cdn->set_error(lang('cdn_error_couldnotmove'));
+            $this->oCdn->set_error(lang('cdn_error_couldnotmove'));
             return false;
         }
     }
@@ -95,44 +95,44 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
     /**
      * Determines whether an object exists or not
-     * @param  string $filename The object's filename
-     * @param  string $bucket   The bucket's slug
+     * @param  string $sFilename The object's filename
+     * @param  string $sBucket   The bucket's slug
      * @return boolean
      */
-    public function object_exists($filename, $bucket)
+    public function objectExists($sFilename, $sBucket)
     {
-        return is_file(DEPLOY_CDN_PATH . $bucket . '/' . $filename);
+        return is_file(DEPLOY_CDN_PATH . $sBucket . '/' . $sFilename);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Destroys (permenantly deletes) an object
-     * @param  string $object The object's filename
-     * @param  string $bucket The bucket's slug
+     * @param  string $sObject The object's filename
+     * @param  string $sBucket The bucket's slug
      * @return boolean
      */
-    public function object_destroy($object, $bucket)
+    public function objectDestroy($sObject, $sBucket)
     {
-        $file   = urldecode($object);
-        $bucket = urldecode($bucket);
+        $sObject = urldecode($sObject);
+        $sBucket = urldecode($sBucket);
 
-        if (file_exists(DEPLOY_CDN_PATH . $bucket . '/' . $file)) {
+        if (file_exists(DEPLOY_CDN_PATH . $sBucket . '/' . $sObject)) {
 
-            if (@unlink(DEPLOY_CDN_PATH . $bucket . '/' . $file)) {
+            if (@unlink(DEPLOY_CDN_PATH . $sBucket . '/' . $sObject)) {
 
-                //  @TODO: Delete Cache items
+                //  @todo: Delete Cache items
                 return true;
 
             } else {
 
-                $this->cdn->set_error(lang('cdn_error_delete'));
+                $this->oCdn->set_error(lang('cdn_error_delete'));
                 return false;
             }
 
         } else {
 
-            $this->cdn->set_error(lang('cdn_error_delete_nofile'));
+            $this->oCdn->set_error(lang('cdn_error_delete_nofile'));
             return false;
         }
     }
@@ -141,21 +141,21 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
     /**
      * Returns a local path for an object
-     * @param  string $bucket   The bucket's slug
-     * @param  string $filename The filename
-     * @return mixed            string on success, false on failure
+     * @param  string $sBucket   The bucket's slug
+     * @param  string $sFilename The filename
+     * @return mixed             String on success, false on failure
      */
-    public function object_local_path($bucket, $filename)
+    public function objectLocalPath($sBucket, $sFilename)
     {
-        $path = DEPLOY_CDN_PATH . $bucket . '/' . $filename;
+        $sPath = DEPLOY_CDN_PATH . $sBucket . '/' . $sFilename;
 
-        if (is_file($path)) {
+        if (is_file($sPath)) {
 
-            return $path;
+            return $sPath;
 
         } else {
 
-            $this->cdn->set_error('Could not find a valid local path for object ' . $bucket . '/' . $filename);
+            $this->oCdn->set_error('Could not find a valid local path for object ' . $sBucket . '/' . $sFilename);
             return false;
         }
     }
@@ -166,21 +166,21 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
     /**
      * Creates a new bucket
-     * @param  string $bucket The bucket's slug
-     * @return  boolean
-     **/
-    public function bucket_create($bucket)
+     * @param  string  $sBucket The bucket's slug
+     * @return boolean
+     */
+    public function bucketCreate($sBucket)
     {
-        $dir = DEPLOY_CDN_PATH . $bucket;
+        $sDir = DEPLOY_CDN_PATH . $sBucket;
 
-        if (is_dir($dir) && is_writeable($dir)) {
+        if (is_dir($sDir) && is_writeable($sDir)) {
 
             return true;
         }
 
         // --------------------------------------------------------------------------
 
-        if (@mkdir($dir)) {
+        if (@mkdir($sDir)) {
 
             return true;
 
@@ -188,11 +188,11 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
             if (getUserObject()->isSuperuser()) {
 
-                $this->cdn->set_error(lang('cdn_error_bucket_mkdir_su', $dir));
+                $this->oCdn->set_error(lang('cdn_error_bucket_mkdir_su', $sDir));
 
             } else {
 
-                $this->cdn->set_error(lang('cdn_error_bucket_mkdir'));
+                $this->oCdn->set_error(lang('cdn_error_bucket_mkdir'));
             }
 
             return false;
@@ -203,18 +203,18 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
     /**
      * Deletes an existing bucket
-     * @param  string $bucket The bucket's slug
+     * @param  string  $sBucket The bucket's slug
      * @return boolean
      */
-    public function bucket_destroy($bucket)
+    public function bucketDestroy($sBucket)
     {
-        if (rmdir(DEPLOY_CDN_PATH . $bucket)) {
+        if (rmdir(DEPLOY_CDN_PATH . $sBucket)) {
 
             return true;
 
         } else {
 
-            $this->cdn->set_error(lang('cdn_error_bucket_unlink'));
+            $this->oCdn->set_error(lang('cdn_error_bucket_unlink'));
             return false;
         }
     }
@@ -225,58 +225,57 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
     /**
      * Generates the correct URL for serving a file
-     * @param  string  $object        The object to serve
-     * @param  string  $bucket        The bucket to serve from
-     * @param  boolean $forceDownload Whether to force a download
+     * @param  string  $sObject        The object to serve
+     * @param  string  $sBucket        The bucket to serve from
+     * @param  boolean $bForceDownload Whether to force a download
      * @return string
      */
-    public function url_serve($object, $bucket, $forceDownload)
+    public function urlServe($sObject, $sBucket, $bForceDownload = false)
     {
-        $out  = $this->sBaseUrl . 'serve/';
-        $out .= $bucket . '/';
-        $out .= $object;
+        $sUrl  = $this->sBaseUrl . 'serve/';
+        $sUrl .= $sBucket . '/';
+        $sUrl .= $sObject;
 
-        if ($forceDownload) {
+        if ($bForceDownload) {
 
-            $out .= '?dl=1';
+            $sUrl .= '?dl=1';
         }
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Returns the scheme of 'serve' URLs
-     * @param  boolean $forceDownload Whetehr or not to force download
+     * @param  boolean $bForceDownload Whetehr or not to force download
      * @return string
      */
-    public function url_serve_scheme($forceDownload)
+    public function urlServeScheme($bForceDownload = false)
     {
-        $out = $this->sBaseUrl . 'serve/{{bucket}}/{{filename}}{{extension}}';
+        $sUrl = $this->sBaseUrl . 'serve/{{bucket}}/{{filename}}{{extension}}';
 
-        if ($forceDownload) {
+        if ($bForceDownload) {
 
-            $out .= '?dl=1';
+            $sUrl .= '?dl=1';
         }
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Generates a URL for serving zipped objects
-     * @param  string $objectIds A comma seperated list of object IDs
-     * @param  string $hash      The security hash
-     * @param  string $filename  The filename ot give the zip file
+     * @param  string $sObjectIds A comma seperated list of object IDs
+     * @param  string $sHash      The security hash
+     * @param  string $sFilename  The filename to give the zip file
      * @return string
      */
-    public function url_serve_zipped($objectIds, $hash, $filename)
+    public function urlServeZipped($sObjectIds, $sHash, $sFilename)
     {
-        $filename = $filename ? '/' . urlencode($filename) : '';
-
-        return $this->urlMakeSecure($this->sBaseUrl . 'zip/' . $objectIds . '/' . $hash . $filename);
+        $sFilename = $sFilename ? '/' . urlencode($sFilename) : '';
+        return $this->urlMakeSecure($this->sBaseUrl . 'zip/' . $sObjectIds . '/' . $sHash . $sFilename);
     }
 
     // --------------------------------------------------------------------------
@@ -284,8 +283,8 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     /**
      * Returns the scheme of 'zipped' urls
      * @return  string
-     **/
-    public function url_serve_zipped_scheme()
+     */
+    public function urlServeZippedScheme()
     {
         return $this->urlMakeSecure($this->sBaseUrl . 'zip/{{ids}}/{{hash}}/{{filename}}');
     }
@@ -293,54 +292,54 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     // --------------------------------------------------------------------------
 
     /**
-     * Generates the correct URL for using the thumb utility
-     * @param   string  $bucket The bucket which the image resides in
-     * @param   string  $object The filename of the image we're 'thumbing'
-     * @param   string  $width  The width of the thumbnail
-     * @param   string  $height The height of the thumbnail
+     * Generates the correct URL for using the crop utility
+     * @param   string  $sBucket The bucket which the image resides in
+     * @param   string  $sObject The filename of the image we're cropping
+     * @param   integer $iWidth  The width of the cropped image
+     * @param   integer $iHeight The height of the cropped image
      * @return  string
-     **/
-    public function url_thumb($object, $bucket, $width, $height)
+     */
+    public function urlCrop($sObject, $sBucket, $iWidth, $iHeight)
     {
-        $out  = $this->sBaseUrl . 'thumb/';
-        $out .= $width . '/' . $height . '/';
-        $out .= $bucket . '/';
-        $out .= $object;
+        $sUrl  = $this->sBaseUrl . 'crop/';
+        $sUrl .= $iWidth . '/' . $iHeight . '/';
+        $sUrl .= $sBucket . '/';
+        $sUrl .= $sObject;
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
-     * Returns the scheme of 'thumb' urls
+     * Returns the scheme of 'crop' urls
      * @return  string
-     **/
-    public function url_thumb_scheme()
+     */
+    public function urlCropScheme()
     {
-        $out = $this->sBaseUrl . 'thumb/{{width}}/{{height}}/{{bucket}}/{{filename}}{{extension}}';
+        $sUrl = $this->sBaseUrl . 'crop/{{width}}/{{height}}/{{bucket}}/{{filename}}{{extension}}';
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Generates the correct URL for using the scale utility
-     * @param   string  $bucket The bucket which the image resides in
-     * @param   string  $object The filename of the image we're 'scaling'
-     * @param   string  $width  The width of the scaled image
-     * @param   string  $height The height of the scaled image
+     * @param   string  $sBucket The bucket which the image resides in
+     * @param   string  $sObject The filename of the image we're 'scaling'
+     * @param   integer $iWidth  The width of the scaled image
+     * @param   integer $iHeight The height of the scaled image
      * @return  string
-     **/
-    public function url_scale($object, $bucket, $width, $height)
+     */
+    public function urlScale($sObject, $sBucket, $iWidth, $iHeight)
     {
-        $out  = $this->sBaseUrl . 'scale/';
-        $out .= $width . '/' . $height . '/';
-        $out .= $bucket . '/';
-        $out .= $object;
+        $sUrl  = $this->sBaseUrl . 'scale/';
+        $sUrl .= $iWidth . '/' . $iHeight . '/';
+        $sUrl .= $sBucket . '/';
+        $sUrl .= $sObject;
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
@@ -348,29 +347,28 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     /**
      * Returns the scheme of 'scale' urls
      * @return  string
-     **/
-    public function url_scale_scheme()
+     */
+    public function urlScaleScheme()
     {
-        $out = $this->sBaseUrl . 'scale/{{width}}/{{height}}/{{bucket}}/{{filename}}{{extension}}';
-
-        return $this->urlMakeSecure($out);
+        $sUrl = $this->sBaseUrl . 'scale/{{width}}/{{height}}/{{bucket}}/{{filename}}{{extension}}';
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Generates the correct URL for using the placeholder utility
-     * @param   int     $width  The width of the placeholder
-     * @param   int     $height The height of the placeholder
-     * @param   int     border  The width of the border round the placeholder
+     * @param   integer $iWidth  The width of the placeholder
+     * @param   integer $iHeight The height of the placeholder
+     * @param   integer $iBorder The width of the border round the placeholder
      * @return  string
-     **/
-    public function url_placeholder($width = 100, $height = 100, $border = 0)
+     */
+    public function urlPlaceholder($iWidth, $iHeight, $iBorder = 0)
     {
-        $out  = $this->sBaseUrl . 'placeholder/';
-        $out .= $width . '/' . $height . '/' . $border;
+        $sUrl  = $this->sBaseUrl . 'placeholder/';
+        $sUrl .= $iWidth . '/' . $iHeight . '/' . $iBorder;
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
@@ -378,30 +376,29 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     /**
      * Returns the scheme of 'placeholder' urls
      * @return  string
-     **/
-    public function url_placeholder_scheme()
+     */
+    public function urlPlaceholderScheme()
     {
-        $out = $this->sBaseUrl . 'placeholder/{{width}}/{{height}}/{{border}}';
-
-        return $this->urlMakeSecure($out);
+        $sUrl = $this->sBaseUrl . 'placeholder/{{width}}/{{height}}/{{border}}';
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
-     * Generates the correct URL for using the placeholder utility
-     * @param   int     $width  The width of the placeholder
-     * @param   int     $height The height of the placeholder
-     * @param   int     border  The width of the border round the placeholder
-     * @return  string
-     **/
-    public function url_blank_avatar($width = 100, $height = 100, $sex = '')
+     * Generates the correct URL for a blank avatar
+     * @param  integer        $iWidth  The width fo the avatar
+     * @param  integer        $iHeight The height of the avatar§
+     * @param  string|integer $mSex    What gender the avatar should represent
+     * @return string
+     */
+    public function urlBlankAvatar($iWidth, $iHeight, $mSex = '')
     {
-        $out  = $this->sBaseUrl . 'blank_avatar/';
-        $out .= $width . '/' . $height;
-        $out .= $sex ? '/' . $sex : '';
+        $sUrl  = $this->sBaseUrl . 'blank_avatar/';
+        $sUrl .= $iWidth . '/' . $iHeight;
+        $sUrl .= $mSex ? '/' . $mSex : '';
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
@@ -409,65 +406,62 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     /**
      * Returns the scheme of 'blank_avatar' urls
      * @return  string
-     **/
-    public function url_blank_avatar_scheme()
+     */
+    public function urlBlankAvatarScheme()
     {
-        $out = $this->sBaseUrl . 'blank_avatar/{{width}}/{{height}}/{{sex}}';
-
-        return $this->urlMakeSecure($out);
+        $sUrl = $this->sBaseUrl . 'blank_avatar/{{width}}/{{height}}/{{sex}}';
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Generates a properly hashed expiring url
-     * @param  string  $bucket        The bucket which the image resides in
-     * @param  string  $object        The object to be served
-     * @param  string  $expires       The length of time the URL should be valid for, in seconds
-     * @param  boolean $forceDownload Whether to force a download
+     * @param  string  $sBucket        The bucket which the image resides in
+     * @param  string  $sObject        The object to be served
+     * @param  integer $iExpires       The length of time the URL should be valid for, in seconds
+     * @param  boolean $bForceDownload Whether to force a download
      * @return string
-     **/
-    public function url_expiring($object, $bucket, $expires, $forceDownload = false)
+     */
+    public function urlExpiring($sObject, $sBucket, $iExpires, $bForceDownload = false)
     {
         //  Hash the expiry time
-        $hash  = $bucket . '|' . $object . '|' . $expires . '|' . time() . '|';
-        $hash .= md5(time() . $bucket . $object . $expires . APP_PRIVATE_KEY);
-        $hash  = get_instance()->encrypt->encode($hash, APP_PRIVATE_KEY);
-        $hash  = urlencode($hash);
+        $sHash  = $sBucket . '|' . $sObject . '|' . $iExpires . '|' . time() . '|';
+        $sHash .= md5(time() . $sBucket . $sObject . $iExpires . APP_PRIVATE_KEY);
+        $sHash  = get_instance()->encrypt->encode($sHash, APP_PRIVATE_KEY);
+        $sHash  = urlencode($sHash);
 
-        $out  = $this->sBaseUrl . 'serve?token=' . $hash;
+        $sUrl  = $this->sBaseUrl . 'serve?token=' . $sHash;
 
-        if ($forceDownload) {
+        if ($bForceDownload) {
 
-            $out .= '&dl=1';
+            $sUrl .= '&dl=1';
         }
 
-        return $this->urlMakeSecure($out);
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Returns the scheme of 'expiring' urls
-     * @param   none
      * @return  string
-     **/
-    public function url_expiring_scheme()
+     */
+    public function urlExpiringScheme()
     {
-        $out = $this->sBaseUrl . 'serve?token={{token}}';
-
-        return $this->urlMakeSecure($out);
+        $sUrl = $this->sBaseUrl . 'serve?token={{token}}';
+        return $this->urlMakeSecure($sUrl);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Formats a URL and makes it secure if needed
-     * @param  string $url The URL to secure
+     * @param  string $sUrl The URL to secure
      * @return string
      */
-    protected function urlMakeSecure($url)
+    protected function urlMakeSecure($sUrl)
     {
-        return site_url($url, isPageSecure());
+        return site_url($sUrl, isPageSecure());
     }
 }
