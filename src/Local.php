@@ -23,7 +23,6 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         //  Load langfile and dependant helper
         $oCi =& get_instance();
-        $oCi->lang->load('cdn/cdn_driver_local');
         $oCi->load->helper('string');
 
         // --------------------------------------------------------------------------
