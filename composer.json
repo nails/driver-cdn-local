@@ -1,0 +1,37 @@
+{
+    "name": "nailsapp/driver-cdn-local",
+    "keywords": ["Nails", "Shed Collective", "CodeIgniter", "CDN Module", "Driver"],
+    "homepage": "http://nailsapp.co.uk/modules/cdn/driver/awslocal",
+    "description": "This is the \"Local\" driver for the Nails CDN module.",
+    "license": "MIT",
+    "authors":
+    [
+        {
+            "name": "Pablo de la Pena",
+            "email": "p@shedcollective.org",
+            "homepage": "http://shedcollective.org",
+            "role": "Developer"
+        }
+    ],
+    "support":
+    {
+        "email": "hello@shedcollective.org"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require":
+    {
+        "phpunit/phpunit": "4.8.*"
+    },
+    "extra":
+    {
+        "nails" :
+        {
+            "type": "driver"
+        }
+    },
+    "autoload":
+    {
+        "psr-4": {"Nails\\Cdn\\Driver\\": "src/"}
+    }
+}
