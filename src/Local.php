@@ -6,6 +6,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 {
     private $oCdn;
     public $aErrors;
+    protected $sBasePath;
     protected $sBaseUrl;
 
     // --------------------------------------------------------------------------
@@ -27,6 +28,8 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         // --------------------------------------------------------------------------
 
+        $this->sBasePath = defined('DEPLOY_CDN_PATH') ? DEPLOY_CDN_PATH : FCPATH . 'assets/uploads';
+        $this->sBasePath = addTrailingSlash($this->sBasePath);
         $this->sBaseUrl = defined('DEPLOY_CDN_BASE_URL') ? DEPLOY_CDN_BASE_URL : 'cdn';
         $this->sBaseUrl = addTrailingSlash($this->sBaseUrl);
     }
@@ -49,13 +52,13 @@ class Local implements \Nails\Cdn\Interfaces\Driver
         // --------------------------------------------------------------------------
 
         //  Check directory exists
-        if (!is_dir(DEPLOY_CDN_PATH . $sBucket)) {
+        if (!is_dir($this->sBasePath . $sBucket)) {
 
             //  Hmm, not writeable, can we create it?
-            if (!@mkdir(DEPLOY_CDN_PATH . $sBucket)) {
+            if (!@mkdir($this->sBasePath . $sBucket)) {
 
                 //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
-                $this->oCdn->set_error(lang('cdn_error_target_write_fail_mkdir', DEPLOY_CDN_PATH . $sBucket));
+                $this->oCdn->set_error(lang('cdn_error_target_write_fail_mkdir', $this->sBasePath . $sBucket));
                 return false;
             }
         }
@@ -63,16 +66,16 @@ class Local implements \Nails\Cdn\Interfaces\Driver
         // --------------------------------------------------------------------------
 
         //  Check bucket is writeable
-        if (!is_really_writable(DEPLOY_CDN_PATH . $sBucket)) {
+        if (!is_really_writable($this->sBasePath . $sBucket)) {
 
-            $this->oCdn->set_error(lang('cdn_error_target_write_fail', DEPLOY_CDN_PATH . $sBucket));
+            $this->oCdn->set_error(lang('cdn_error_target_write_fail', $this->sBasePath . $sBucket));
             return false;
         }
 
         // --------------------------------------------------------------------------
 
         //  Move the file
-        $sDest = DEPLOY_CDN_PATH . $sBucket . '/' . $sFilename;
+        $sDest = $this->sBasePath . $sBucket . '/' . $sFilename;
 
         if (@move_uploaded_file($sSource, $sDest)) {
 
@@ -100,7 +103,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
      */
     public function objectExists($sFilename, $sBucket)
     {
-        return is_file(DEPLOY_CDN_PATH . $sBucket . '/' . $sFilename);
+        return is_file($this->sBasePath . $sBucket . '/' . $sFilename);
     }
 
     // --------------------------------------------------------------------------
@@ -116,9 +119,9 @@ class Local implements \Nails\Cdn\Interfaces\Driver
         $sObject = urldecode($sObject);
         $sBucket = urldecode($sBucket);
 
-        if (file_exists(DEPLOY_CDN_PATH . $sBucket . '/' . $sObject)) {
+        if (file_exists($this->sBasePath . $sBucket . '/' . $sObject)) {
 
-            if (@unlink(DEPLOY_CDN_PATH . $sBucket . '/' . $sObject)) {
+            if (@unlink($this->sBasePath . $sBucket . '/' . $sObject)) {
 
                 //  @todo: Delete Cache items
                 return true;
@@ -146,7 +149,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
      */
     public function objectLocalPath($sBucket, $sFilename)
     {
-        $sPath = DEPLOY_CDN_PATH . $sBucket . '/' . $sFilename;
+        $sPath = $this->sBasePath . $sBucket . '/' . $sFilename;
 
         if (is_file($sPath)) {
 
@@ -170,7 +173,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
      */
     public function bucketCreate($sBucket)
     {
-        $sDir = DEPLOY_CDN_PATH . $sBucket;
+        $sDir = $this->sBasePath . $sBucket;
 
         if (is_dir($sDir) && is_writeable($sDir)) {
 
@@ -207,7 +210,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
      */
     public function bucketDestroy($sBucket)
     {
-        if (rmdir(DEPLOY_CDN_PATH . $sBucket)) {
+        if (rmdir($this->sBasePath . $sBucket)) {
 
             return true;
 
