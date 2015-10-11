@@ -14,10 +14,9 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     /**
      * Constructor
      */
-    public function __construct()
+    public function __construct($oCdn)
     {
-        //  Shortcut to CDN
-        $this->oCdn    =& get_instance()->cdn;
+        $this->oCdn    = $oCdn;
         $this->aErrors = array();
 
         // --------------------------------------------------------------------------
@@ -30,8 +29,8 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         $this->sBasePath = defined('DEPLOY_CDN_PATH') ? DEPLOY_CDN_PATH : FCPATH . 'assets/uploads';
         $this->sBasePath = addTrailingSlash($this->sBasePath);
-        $this->sBaseUrl = defined('DEPLOY_CDN_BASE_URL') ? DEPLOY_CDN_BASE_URL : 'cdn';
-        $this->sBaseUrl = addTrailingSlash($this->sBaseUrl);
+        $this->sBaseUrl  = defined('DEPLOY_CDN_BASE_URL') ? DEPLOY_CDN_BASE_URL : 'cdn';
+        $this->sBaseUrl  = addTrailingSlash($this->sBaseUrl);
     }
 
     /**
