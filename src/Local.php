@@ -2,6 +2,8 @@
 
 namespace Nails\Cdn\Driver;
 
+use Nails\Factory;
+
 class Local implements \Nails\Cdn\Interfaces\Driver
 {
     private $oCdn;
@@ -23,7 +25,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         //  Load langfile and dependant helper
         $oCi =& get_instance();
-        \Nails\Factory::helper('string');
+        Factory::helper('string');
 
         // --------------------------------------------------------------------------
 
