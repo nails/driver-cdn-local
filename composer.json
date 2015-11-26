@@ -28,7 +28,7 @@
         "nails" :
         {
             "type": "driver",
-            "subType": "cdn"
+            "forModule": "nailsapp/module-cdn"
         }
     },
     "autoload":
