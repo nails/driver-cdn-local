@@ -28,7 +28,11 @@
         "nails" :
         {
             "type": "driver",
-            "forModule": "nailsapp/module-cdn"
+            "forModule": "nailsapp/module-cdn",
+            "data": {
+                "namespace": "Nails\\Cdn\\Driver\\",
+                "class": "Local"
+            }
         }
     },
     "autoload":
