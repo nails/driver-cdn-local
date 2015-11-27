@@ -6,8 +6,7 @@ use Nails\Factory;
 
 class Local implements \Nails\Cdn\Interfaces\Driver
 {
-    private $oCdn;
-    public $aErrors;
+    protected $aErrors;
     protected $sBasePath;
     protected $sBaseUrl;
 
@@ -16,23 +15,40 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     /**
      * Constructor
      */
-    public function __construct($oCdn)
+    public function __construct()
     {
-        $this->oCdn    = $oCdn;
-        $this->aErrors = array();
-
-        // --------------------------------------------------------------------------
-
-        //  Load langfile and dependant helper
-        $oCi =& get_instance();
         Factory::helper('string');
 
-        // --------------------------------------------------------------------------
-
+        $this->aErrors = array();
         $this->sBasePath = defined('DEPLOY_CDN_PATH') ? DEPLOY_CDN_PATH : FCPATH . 'assets/uploads';
         $this->sBasePath = addTrailingSlash($this->sBasePath);
         $this->sBaseUrl  = defined('DEPLOY_CDN_BASE_URL') ? DEPLOY_CDN_BASE_URL : 'cdn';
         $this->sBaseUrl  = addTrailingSlash($this->sBaseUrl);
+    }
+
+    /**
+     * ERROR METHODS
+     */
+
+    /**
+     * Adds an error to the stack
+     * @param string $sError The error string
+     */
+    protected function setError($sError) {
+        if (!empty($sError)) {
+            $this->aErrors[] = $sError;
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the last error to occur
+     * @return string
+     */
+    public function lastError()
+    {
+        return end($this->aErrors);
     }
 
     /**
@@ -59,7 +75,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
             if (!@mkdir($this->sBasePath . $sBucket)) {
 
                 //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
-                $this->oCdn->set_error(lang('cdn_error_target_write_fail_mkdir', $this->sBasePath . $sBucket));
+                $this->setError(lang('cdn_error_target_write_fail_mkdir', $this->sBasePath . $sBucket));
                 return false;
             }
         }
@@ -69,7 +85,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
         //  Check bucket is writeable
         if (!is_really_writable($this->sBasePath . $sBucket)) {
 
-            $this->oCdn->set_error(lang('cdn_error_target_write_fail', $this->sBasePath . $sBucket));
+            $this->setError(lang('cdn_error_target_write_fail', $this->sBasePath . $sBucket));
             return false;
         }
 
@@ -89,7 +105,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         } else {
 
-            $this->oCdn->set_error(lang('cdn_error_couldnotmove'));
+            $this->setError(lang('cdn_error_couldnotmove'));
             return false;
         }
     }
@@ -129,13 +145,13 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
             } else {
 
-                $this->oCdn->set_error(lang('cdn_error_delete'));
+                $this->setError(lang('cdn_error_delete'));
                 return false;
             }
 
         } else {
 
-            $this->oCdn->set_error(lang('cdn_error_delete_nofile'));
+            $this->setError(lang('cdn_error_delete_nofile'));
             return false;
         }
     }
@@ -158,7 +174,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         } else {
 
-            $this->oCdn->set_error('Could not find a valid local path for object ' . $sBucket . '/' . $sFilename);
+            $this->setError('Could not find a valid local path for object ' . $sBucket . '/' . $sFilename);
             return false;
         }
     }
@@ -191,11 +207,11 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
             if (getUserObject()->isSuperuser()) {
 
-                $this->oCdn->set_error(lang('cdn_error_bucket_mkdir_su', $sDir));
+                $this->setError(lang('cdn_error_bucket_mkdir_su', $sDir));
 
             } else {
 
-                $this->oCdn->set_error(lang('cdn_error_bucket_mkdir'));
+                $this->setError(lang('cdn_error_bucket_mkdir'));
             }
 
             return false;
@@ -217,7 +233,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         } else {
 
-            $this->oCdn->set_error(lang('cdn_error_bucket_unlink'));
+            $this->setError(lang('cdn_error_bucket_unlink'));
             return false;
         }
     }
