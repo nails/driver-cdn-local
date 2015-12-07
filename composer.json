@@ -27,6 +27,7 @@
     {
         "nails" :
         {
+            "name": "Local",
             "type": "driver",
             "forModule": "nailsapp/module-cdn",
             "data": {
