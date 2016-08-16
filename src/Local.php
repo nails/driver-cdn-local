@@ -83,7 +83,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
         // --------------------------------------------------------------------------
 
         //  Check bucket is writeable
-        if (!is_really_writable($this->sBasePath . $sBucket)) {
+        if (!is_writable($this->sBasePath . $sBucket)) {
 
             $this->setError(lang('cdn_error_target_write_fail', $this->sBasePath . $sBucket));
             return false;
