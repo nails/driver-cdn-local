@@ -266,8 +266,22 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     // --------------------------------------------------------------------------
 
     /**
+     * Generate the correct URL for serving a file direct from the file system
+     * @param $sObject
+     * @param $sBucket
+     * @return string
+     */
+    public function urlServeRaw($sObject, $sBucket)
+    {
+        $sUrl = 'assets/uploads/' . $sBucket . '/' . $sObject;
+        return $this->urlMakeSecure($sUrl);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Returns the scheme of 'serve' URLs
-     * @param  boolean $bForceDownload Whetehr or not to force download
+     * @param  boolean $bForceDownload Whether or not to force download
      * @return string
      */
     public function urlServeScheme($bForceDownload = false)
