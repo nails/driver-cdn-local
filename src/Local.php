@@ -71,7 +71,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
         //  Check directory exists
         if (!is_dir($this->sBasePath . $sBucket)) {
 
-            //  Hmm, not writeable, can we create it?
+            //  Hmm, not writable, can we create it?
             if (!@mkdir($this->sBasePath . $sBucket)) {
 
                 //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
@@ -82,7 +82,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
 
         // --------------------------------------------------------------------------
 
-        //  Check bucket is writeable
+        //  Check bucket is writable
         if (!is_writable($this->sBasePath . $sBucket)) {
 
             $this->setError(lang('cdn_error_target_write_fail', $this->sBasePath . $sBucket));
@@ -192,7 +192,7 @@ class Local implements \Nails\Cdn\Interfaces\Driver
     {
         $sDir = $this->sBasePath . $sBucket;
 
-        if (is_dir($sDir) && is_writeable($sDir)) {
+        if (is_dir($sDir) && is_writable($sDir)) {
 
             return true;
         }
