@@ -63,7 +63,12 @@ class Local extends Base implements Driver
                 //  Hmm, not writable, can we create it?
                 if (!@mkdir($this->getPath() . $sBucket)) {
                     //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
-                    throw new \Exception(lang('cdn_error_target_write_fail_mkdir', $this->getPath() . $sBucket));
+                    throw new \Exception(
+                        sprintf(
+                            'The target directory does not exist and could not be created (%s)',
+                            $this->getPath() . $sBucket
+                        )
+                    );
                 }
             }
 
@@ -71,7 +76,12 @@ class Local extends Base implements Driver
 
             //  Check bucket is writable
             if (!is_writable($this->getPath() . $sBucket)) {
-                throw new \Exception(lang('cdn_error_target_write_fail', $this->getPath() . $sBucket));
+                throw new \Exception(
+                    sprintf(
+                        'The target directory does not exist and could not be created (%s)',
+                        $this->getPath() . $sBucket
+                    )
+                );
             }
 
             //  Move the file
@@ -79,7 +89,7 @@ class Local extends Base implements Driver
 
             if (!@move_uploaded_file($sSource, $sDestination)) {
                 if (!@copy($sSource, $sDestination)) {
-                    throw new \Exception(lang('cdn_error_couldnotmove'));
+                    throw new \Exception('Failed to move uploaded file into the bucket');
                 }
             }
 
@@ -125,10 +135,10 @@ class Local extends Base implements Driver
 
             if (file_exists($this->getPath() . $sBucket . '/' . $sObject)) {
                 if (!@unlink($this->getPath() . $sBucket . '/' . $sObject)) {
-                    throw new \Exception(lang('cdn_error_delete'));
+                    throw new \Exception('File failed to delete, it may be in use');
                 }
             } else {
-                throw new \Exception(lang('cdn_error_delete_nofile'));
+                throw new \Exception('No file to delete');
             }
 
             return true;
@@ -182,10 +192,10 @@ class Local extends Base implements Driver
 
             if (!is_dir($sDir)) {
                 if (!@mkdir($sDir)) {
-                    if (getUserObject()->isSuperuser()) {
-                        throw new \Exception(lang('cdn_error_bucket_mkdir_su', $sDir));
+                    if (isSuperuser()) {
+                        throw new \Exception(sprintf('Failed to create bucket directory (%s)', $sDir));
                     } else {
-                        throw new \Exception(lang('cdn_error_bucket_mkdir'));
+                        throw new \Exception('Failed to create bucket directory');
                     }
                 }
             }
@@ -214,7 +224,7 @@ class Local extends Base implements Driver
         try {
 
             if (!rmdir($this->getPath() . $sBucket)) {
-                throw new \Exception(lang('cdn_error_bucket_unlink'));
+                throw new \Exception('Failed to destroy bucket');
             }
 
             return true;
