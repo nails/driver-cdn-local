@@ -5,6 +5,7 @@ namespace Nails\Cdn\Driver;
 use Nails\Cdn\Interfaces\Driver;
 use Nails\Common\Driver\Base;
 use Nails\Common\Traits\ErrorHandling;
+use Nails\Factory;
 
 class Local extends Base implements Driver
 {
@@ -504,12 +505,13 @@ class Local extends Base implements Driver
      */
     public function urlExpiring($sObject, $sBucket, $iExpires, $bForceDownload = false)
     {
-        $sUrl = $this->urlExpiringScheme();
+        $sUrl     = $this->urlExpiringScheme();
+        $oEncrypt = Factory::service('Encrypt');
 
         //  Hash the expiry time
         $sToken = $sBucket . '|' . $sObject . '|' . $iExpires . '|' . time() . '|';
         $sToken .= md5(time() . $sBucket . $sObject . $iExpires . APP_PRIVATE_KEY);
-        $sToken = get_instance()->encrypt->encode($sToken, APP_PRIVATE_KEY);
+        $sToken = $oEncrypt->encode($sToken, APP_PRIVATE_KEY);
         $sToken = urlencode($sToken);
 
         //  Sub in the values
