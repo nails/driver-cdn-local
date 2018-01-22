@@ -53,21 +53,22 @@ class Local extends Base implements Driver
     {
         try {
 
-            $sBucket   = !empty($data->bucket->slug) ? $data->bucket->slug : '';
-            $sFilename = !empty($data->filename) ? $data->filename : '';
-            $sSource   = !empty($data->file) ? $data->file : '';
+            $sBucket     = !empty($data->bucket->slug) ? $data->bucket->slug : '';
+            $sFilename   = !empty($data->filename) ? $data->filename : '';
+            $sSource     = !empty($data->file) ? $data->file : '';
+            $sBucketPath = $this->getPath() . $sBucket;
 
             // --------------------------------------------------------------------------
 
             //  Check directory exists
-            if (!is_dir($this->getPath() . $sBucket)) {
+            if (!is_dir($sBucketPath)) {
                 //  Hmm, not writable, can we create it?
-                if (!@mkdir($this->getPath() . $sBucket)) {
+                if (!@mkdir($sBucketPath)) {
                     //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
                     throw new \Exception(
                         sprintf(
                             'The target directory does not exist and could not be created (%s)',
-                            $this->getPath() . $sBucket
+                            $sBucketPath
                         )
                     );
                 }
@@ -76,17 +77,17 @@ class Local extends Base implements Driver
             // --------------------------------------------------------------------------
 
             //  Check bucket is writable
-            if (!is_writable($this->getPath() . $sBucket)) {
+            if (!is_writable($sBucketPath)) {
                 throw new \Exception(
                     sprintf(
-                        'The target directory does not exist and could not be created (%s)',
-                        $this->getPath() . $sBucket
+                        'The target directory is not writable (%s)',
+                        $sBucketPath
                     )
                 );
             }
 
             //  Move the file
-            $sDestination = $this->getPath() . $sBucket . '/' . $sFilename;
+            $sDestination = $sBucketPath . '/' . $sFilename;
 
             if (!@move_uploaded_file($sSource, $sDestination)) {
                 if (!@copy($sSource, $sDestination)) {
