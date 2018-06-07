@@ -512,7 +512,7 @@ class Local extends Base implements Driver
         //  Hash the expiry time
         $sToken = $sBucket . '|' . $sObject . '|' . $iExpires . '|' . time() . '|';
         $sToken .= md5(time() . $sBucket . $sObject . $iExpires . APP_PRIVATE_KEY);
-        $sToken = $oEncrypt->encode($sToken, APP_PRIVATE_KEY);
+        $sToken = $oEncrypt->encode($sToken);
         $sToken = urlencode($sToken);
 
         //  Sub in the values
