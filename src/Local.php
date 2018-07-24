@@ -279,7 +279,7 @@ class Local extends Base implements Driver
     public function urlServeRaw($sObject, $sBucket)
     {
         $sUrl = 'assets/uploads/' . $sBucket . '/' . $sObject;
-        return $this->urlMakeSecure($sUrl);
+        return $this->urlMakeSecure($sUrl, false);
     }
 
     // --------------------------------------------------------------------------
@@ -299,7 +299,7 @@ class Local extends Base implements Driver
             $sUrl .= '?dl=1';
         }
 
-        return $this->urlMakeSecure($sUrl);
+        return $this->urlMakeSecure($sUrl, false);
     }
 
     // --------------------------------------------------------------------------
