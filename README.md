@@ -7,7 +7,7 @@ http://nailsapp.co.uk/modules/cdn/driver/local
 
 ## Installing
 
-    composer require nailsapp/driver-cdn-local
+    composer require nails/driver-cdn-local
     
     
 ## Configure

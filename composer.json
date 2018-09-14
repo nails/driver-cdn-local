@@ -1,5 +1,5 @@
 {
-    "name": "nailsapp/driver-cdn-local",
+    "name": "nails/driver-cdn-local",
     "keywords": ["Nails", "Shed Collective", "CodeIgniter", "CDN Module", "Driver"],
     "homepage": "http://nailsapp.co.uk/modules/cdn/driver/awslocal",
     "description": "This is the \"Local\" driver for the Nails CDN module.",
@@ -30,7 +30,7 @@
             "name": "Local",
             "type": "driver",
             "subType": "storage",
-            "forModule": "nailsapp/module-cdn",
+            "forModule": "nails/module-cdn",
             "data": {
                 "namespace": "Nails\\Cdn\\Driver\\",
                 "class": "Local",
