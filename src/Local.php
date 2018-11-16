@@ -6,6 +6,7 @@ use Nails\Cdn\Interfaces\Driver;
 use Nails\Common\Driver\Base;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Factory;
+use Nails\Functions;
 
 class Local extends Base implements Driver
 {
@@ -547,7 +548,7 @@ class Local extends Base implements Driver
      */
     protected function urlMakeSecure($sUrl, $bIsProcessing = true)
     {
-        if (isPageSecure()) {
+        if (Functions::isPageSecure()) {
             if ($bIsProcessing) {
                 $sSearch  = $this->getUri('process');
                 $sReplace = $this->getUri('process_secure');
