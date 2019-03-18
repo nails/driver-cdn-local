@@ -4,6 +4,7 @@ namespace Nails\Cdn\Driver;
 
 use Nails\Cdn\Interfaces\Driver;
 use Nails\Common\Driver\Base;
+use Nails\Common\Exception\NailsException;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Factory;
 use Nails\Functions;
@@ -66,7 +67,7 @@ class Local extends Base implements Driver
                 //  Hmm, not writable, can we create it?
                 if (!@mkdir($sBucketPath)) {
                     //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
-                    throw new \Exception(
+                    throw new NailsException(
                         sprintf(
                             'The target directory does not exist and could not be created (%s)',
                             $sBucketPath
@@ -79,7 +80,7 @@ class Local extends Base implements Driver
 
             //  Check bucket is writable
             if (!is_writable($sBucketPath)) {
-                throw new \Exception(
+                throw new NailsException(
                     sprintf(
                         'The target directory is not writable (%s)',
                         $sBucketPath
@@ -92,7 +93,7 @@ class Local extends Base implements Driver
 
             if (!@move_uploaded_file($sSource, $sDestination)) {
                 if (!@copy($sSource, $sDestination)) {
-                    throw new \Exception('Failed to move uploaded file into the bucket');
+                    throw new NailsException('Failed to move uploaded file into the bucket');
                 }
             }
 
@@ -138,10 +139,10 @@ class Local extends Base implements Driver
 
             if (file_exists($this->getPath() . $sBucket . '/' . $sObject)) {
                 if (!@unlink($this->getPath() . $sBucket . '/' . $sObject)) {
-                    throw new \Exception('File failed to delete, it may be in use');
+                    throw new NailsException('File failed to delete, it may be in use');
                 }
             } else {
-                throw new \Exception('No file to delete');
+                throw new NailsException('No file to delete');
             }
 
             return true;
@@ -196,9 +197,9 @@ class Local extends Base implements Driver
             if (!is_dir($sDir)) {
                 if (!@mkdir($sDir)) {
                     if (isSuperuser()) {
-                        throw new \Exception(sprintf('Failed to create bucket directory (%s)', $sDir));
+                        throw new NailsException(sprintf('Failed to create bucket directory (%s)', $sDir));
                     } else {
-                        throw new \Exception('Failed to create bucket directory');
+                        throw new NailsException('Failed to create bucket directory');
                     }
                 }
             }
@@ -227,7 +228,7 @@ class Local extends Base implements Driver
         try {
 
             if (!rmdir($this->getPath() . $sBucket)) {
-                throw new \Exception('Failed to destroy bucket');
+                throw new NailsException('Failed to destroy bucket');
             }
 
             return true;
