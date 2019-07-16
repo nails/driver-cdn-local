@@ -35,7 +35,7 @@ class Local extends Base implements Driver
      */
     protected function getUri($sUriType)
     {
-        return site_url($this->getSetting('uri_' . $sUriType));
+        return siteUrl($this->getSetting('uri_' . $sUriType));
     }
 
     // --------------------------------------------------------------------------
@@ -560,6 +560,6 @@ class Local extends Base implements Driver
             $sUrl = str_replace($sSearch, $sReplace, $sUrl);
         }
 
-        return preg_match('#^https?://#', $sUrl) ? $sUrl : site_url($sUrl);
+        return preg_match('#^https?://#', $sUrl) ? $sUrl : siteUrl($sUrl);
     }
 }
