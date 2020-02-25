@@ -5,6 +5,7 @@ namespace Nails\Cdn\Driver;
 use Nails\Cdn\Interfaces\Driver;
 use Nails\Common\Driver\Base;
 use Nails\Common\Exception\NailsException;
+use Nails\Common\Service\Encrypt;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Factory;
 use Nails\Functions;
@@ -17,6 +18,7 @@ class Local extends Base implements Driver
 
     /**
      * Returns the path to the local upload directory
+     *
      * @return string
      */
     protected function getPath()
@@ -47,9 +49,9 @@ class Local extends Base implements Driver
     /**
      * Creates a new object
      *
-     * @param  \stdClass $data Data to create the object with
+     * @param \stdClass $data Data to create the object with
      *
-     * @return boolean
+     * @return bool
      */
     public function objectCreate($data)
     {
@@ -110,10 +112,10 @@ class Local extends Base implements Driver
     /**
      * Determines whether an object exists or not
      *
-     * @param  string $sFilename The object's filename
-     * @param  string $sBucket   The bucket's slug
+     * @param string $sFilename The object's filename
+     * @param string $sBucket   The bucket's slug
      *
-     * @return boolean
+     * @return bool
      */
     public function objectExists($sFilename, $sBucket)
     {
@@ -125,10 +127,10 @@ class Local extends Base implements Driver
     /**
      * Destroys (permanently deletes) an object
      *
-     * @param  string $sObject The object's filename
-     * @param  string $sBucket The bucket's slug
+     * @param string $sObject The object's filename
+     * @param string $sBucket The bucket's slug
      *
-     * @return boolean
+     * @return bool
      */
     public function objectDestroy($sObject, $sBucket)
     {
@@ -158,8 +160,8 @@ class Local extends Base implements Driver
     /**
      * Returns a local path for an object
      *
-     * @param  string $sBucket   The bucket's slug
-     * @param  string $sFilename The filename
+     * @param string $sBucket   The bucket's slug
+     * @param string $sFilename The filename
      *
      * @return mixed             String on success, false on failure
      */
@@ -184,9 +186,9 @@ class Local extends Base implements Driver
     /**
      * Creates a new bucket
      *
-     * @param  string $sBucket The bucket's slug
+     * @param string $sBucket The bucket's slug
      *
-     * @return boolean
+     * @return bool
      */
     public function bucketCreate($sBucket)
     {
@@ -217,9 +219,9 @@ class Local extends Base implements Driver
     /**
      * Deletes an existing bucket
      *
-     * @param  string $sBucket The bucket's slug
+     * @param string $sBucket The bucket's slug
      *
-     * @return boolean
+     * @return bool
      */
     public function bucketDestroy($sBucket)
     {
@@ -248,9 +250,9 @@ class Local extends Base implements Driver
     /**
      * Generates the correct URL for serving a file
      *
-     * @param  string  $sObject        The object to serve
-     * @param  string  $sBucket        The bucket to serve from
-     * @param  boolean $bForceDownload Whether to force a download
+     * @param string $sObject        The object to serve
+     * @param string $sBucket        The bucket to serve from
+     * @param bool   $bForceDownload Whether to force a download
      *
      * @return string
      */
@@ -289,7 +291,7 @@ class Local extends Base implements Driver
     /**
      * Returns the scheme of 'serve' URLs
      *
-     * @param  boolean $bForceDownload Whether or not to force download
+     * @param bool $bForceDownload Whether or not to force download
      *
      * @return string
      */
@@ -309,9 +311,9 @@ class Local extends Base implements Driver
     /**
      * Generates a URL for serving zipped objects
      *
-     * @param  string $sObjectIds A comma separated list of object IDs
-     * @param  string $sHash      The security hash
-     * @param  string $sFilename  The filename to give the zip file
+     * @param string $sObjectIds A comma separated list of object IDs
+     * @param string $sHash      The security hash
+     * @param string $sFilename  The filename to give the zip file
      *
      * @return string
      */
@@ -331,6 +333,7 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'zipped' urls
+     *
      * @return  string
      */
     public function urlServeZippedScheme()
@@ -345,10 +348,10 @@ class Local extends Base implements Driver
     /**
      * Generates the correct URL for using the crop utility
      *
-     * @param   string  $sBucket The bucket which the image resides in
-     * @param   string  $sObject The filename of the image we're cropping
-     * @param   integer $iWidth  The width of the cropped image
-     * @param   integer $iHeight The height of the cropped image
+     * @param string $sBucket The bucket which the image resides in
+     * @param string $sObject The filename of the image we're cropping
+     * @param int    $iWidth  The width of the cropped image
+     * @param int    $iHeight The height of the cropped image
      *
      * @return  string
      */
@@ -372,6 +375,7 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'crop' urls
+     *
      * @return  string
      */
     public function urlCropScheme()
@@ -386,10 +390,10 @@ class Local extends Base implements Driver
     /**
      * Generates the correct URL for using the scale utility
      *
-     * @param   string  $sBucket The bucket which the image resides in
-     * @param   string  $sObject The filename of the image we're 'scaling'
-     * @param   integer $iWidth  The width of the scaled image
-     * @param   integer $iHeight The height of the scaled image
+     * @param string $sBucket The bucket which the image resides in
+     * @param string $sObject The filename of the image we're 'scaling'
+     * @param int    $iWidth  The width of the scaled image
+     * @param int    $iHeight The height of the scaled image
      *
      * @return  string
      */
@@ -413,6 +417,7 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'scale' urls
+     *
      * @return  string
      */
     public function urlScaleScheme()
@@ -427,9 +432,9 @@ class Local extends Base implements Driver
     /**
      * Generates the correct URL for using the placeholder utility
      *
-     * @param   integer $iWidth  The width of the placeholder
-     * @param   integer $iHeight The height of the placeholder
-     * @param   integer $iBorder The width of the border round the placeholder
+     * @param int $iWidth  The width of the placeholder
+     * @param int $iHeight The height of the placeholder
+     * @param int $iBorder The width of the border round the placeholder
      *
      * @return  string
      */
@@ -449,6 +454,7 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'placeholder' urls
+     *
      * @return  string
      */
     public function urlPlaceholderScheme()
@@ -463,9 +469,9 @@ class Local extends Base implements Driver
     /**
      * Generates the correct URL for a blank avatar
      *
-     * @param  integer        $iWidth  The width fo the avatar
-     * @param  integer        $iHeight The height of the avatar§
-     * @param  string|integer $mSex    What gender the avatar should represent
+     * @param int        $iWidth  The width fo the avatar
+     * @param int        $iHeight The height of the avatar§
+     * @param string|int $mSex    What gender the avatar should represent
      *
      * @return string
      */
@@ -485,6 +491,7 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'blank_avatar' urls
+     *
      * @return  string
      */
     public function urlBlankAvatarScheme()
@@ -499,22 +506,23 @@ class Local extends Base implements Driver
     /**
      * Generates a properly hashed expiring url
      *
-     * @param  string  $sBucket        The bucket which the image resides in
-     * @param  string  $sObject        The object to be served
-     * @param  integer $iExpires       The length of time the URL should be valid for, in seconds
-     * @param  boolean $bForceDownload Whether to force a download
+     * @param string $sBucket        The bucket which the image resides in
+     * @param string $sObject        The object to be served
+     * @param int    $iExpires       The length of time the URL should be valid for, in seconds
+     * @param bool   $bForceDownload Whether to force a download
      *
      * @return string
      */
     public function urlExpiring($sObject, $sBucket, $iExpires, $bForceDownload = false)
     {
-        $sUrl     = $this->urlExpiringScheme();
+        $sUrl = $this->urlExpiringScheme();
+        /** @var Encrypt $oEncrypt */
         $oEncrypt = Factory::service('Encrypt');
 
         //  Hash the expiry time
         $sToken = $sBucket . '|' . $sObject . '|' . $iExpires . '|' . time() . '|';
         $sToken .= md5(time() . $sBucket . $sObject . $iExpires . APP_PRIVATE_KEY);
-        $sToken = $oEncrypt->encode($sToken);
+        $sToken = $oEncrypt->encode($sToken, APP_PRIVATE_KEY);
         $sToken = urlencode($sToken);
 
         //  Sub in the values
@@ -528,6 +536,7 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'expiring' urls
+     *
      * @return  string
      */
     public function urlExpiringScheme()
@@ -542,8 +551,8 @@ class Local extends Base implements Driver
     /**
      * Formats a URL and makes it secure if needed
      *
-     * @param  string  $sUrl          The URL to secure
-     * @param  boolean $bIsProcessing Whether it's a processing type URL
+     * @param string $sUrl          The URL to secure
+     * @param bool   $bIsProcessing Whether it's a processing type URL
      *
      * @return string
      */
