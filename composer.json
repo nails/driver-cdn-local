@@ -71,6 +71,9 @@
                             ]
                         }
                     ]
+            },
+            "scripts": {
+                "install": "./scripts/setup.sh"
             }
         }
     },
