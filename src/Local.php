@@ -7,6 +7,7 @@ use Nails\Common\Driver\Base;
 use Nails\Common\Exception\NailsException;
 use Nails\Common\Service\Encrypt;
 use Nails\Common\Traits\ErrorHandling;
+use Nails\Config;
 use Nails\Factory;
 use Nails\Functions;
 
@@ -521,8 +522,8 @@ class Local extends Base implements Driver
 
         //  Hash the expiry time
         $sToken = $sBucket . '|' . $sObject . '|' . $iExpires . '|' . time() . '|';
-        $sToken .= md5(time() . $sBucket . $sObject . $iExpires . APP_PRIVATE_KEY);
-        $sToken = $oEncrypt->encode($sToken, APP_PRIVATE_KEY);
+        $sToken .= md5(time() . $sBucket . $sObject . $iExpires . Config::get('APP_PRIVATE_KEY'));
+        $sToken = $oEncrypt->encode($sToken, Config::get('APP_PRIVATE_KEY'));
         $sToken = urlencode($sToken);
 
         //  Sub in the values
