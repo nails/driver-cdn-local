@@ -333,8 +333,7 @@ class Local extends Base implements Driver
         $sUrl = str_replace('{{hash}}', $sHash, $sUrl);
         $sUrl = str_replace('{{filename}}', urlencode($sFilename), $sUrl);
 
-            return $sUrl;
-        }
+        return $sUrl;
     }
 
     // --------------------------------------------------------------------------
