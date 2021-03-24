@@ -48,25 +48,25 @@
                                     "key": "uri_serve",
                                     "label": "Serving URI",
                                     "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl($value)</code>"
+                                    "info": "Value will be passed into <code>siteUrl()</code>"
                                 },
                                 {
                                     "key": "uri_serve_secure",
                                     "label": "Serving URI (Secure)",
                                     "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl($value, true)</code>"
+                                    "info": "Value will be passed into <code>siteUrl()</code>"
                                 },
                                 {
                                     "key": "uri_process",
                                     "label": "Processing URI",
                                     "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl($value)</code>"
+                                    "info": "Value will be passed into <code>siteUrl()</code>"
                                 },
                                 {
                                     "key": "uri_process_secure",
                                     "label": "Processing URI (Secure)",
                                     "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl($value, true)</code>"
+                                    "info": "Value will be passed into <code>siteUrl()</code>"
                                 }
                             ]
                         }
