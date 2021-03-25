@@ -1,6 +1,6 @@
 <?php
 
-namespace Nails\Cdn\Driver\Settings;
+namespace Nails\Cdn\Driver\Local\Settings;
 
 use Nails\Common\Helper\Form;
 use Nails\Common\Interfaces;
@@ -11,7 +11,7 @@ use Nails\Factory;
 /**
  * Class Local
  *
- * @package Nails\Cdn\Driver\Settings
+ * @package Nails\Cdn\Driver\Local\Settings
  */
 class Local implements Interfaces\Component\Settings
 {

@@ -1,11 +1,16 @@
 {
     "name": "nails/driver-cdn-local",
-    "keywords": ["Nails", "Shed Collective", "CodeIgniter", "CDN Module", "Driver"],
+    "keywords": [
+        "Nails",
+        "Shed Collective",
+        "CodeIgniter",
+        "CDN Module",
+        "Driver"
+    ],
     "homepage": "http://nailsapp.co.uk/modules/cdn/driver/awslocal",
     "description": "This is the \"Local\" driver for the Nails CDN module.",
     "license": "MIT",
-    "authors":
-    [
+    "authors": [
         {
             "name": "Pablo de la Pena",
             "email": "p@nailsapp.co.uk",
@@ -13,25 +18,27 @@
             "role": "Developer"
         }
     ],
-    "support":
-    {
+    "support": {
         "email": "hello@nailsapp.co.uk"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "require-dev":
-    {
+    "require-dev": {
         "phpunit/phpunit": "9.*"
     },
-    "extra":
-    {
-        "nails" :
-        {
+    "autoload": {
+        "psr-4": {
+            "Nails\\Cdn\\Driver\\": "src/",
+            "Nails\\Cdn\\Driver\\Local\\": "src/Local/"
+        }
+    },
+    "extra": {
+        "nails": {
             "name": "Local",
             "type": "driver",
             "subType": "storage",
             "forModule": "nails/module-cdn",
-            "namespace": "Nails\\Cdn\\Driver\\",
+            "namespace": "Nails\\Cdn\\Driver\\Local\\",
             "data": {
                 "namespace": "Nails\\Cdn\\Driver\\",
                 "class": "Local"
@@ -40,9 +47,5 @@
                 "install": "./scripts/setup.sh"
             }
         }
-    },
-    "autoload":
-    {
-        "psr-4": {"Nails\\Cdn\\Driver\\": "src/"}
     }
 }
