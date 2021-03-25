@@ -31,46 +31,10 @@
             "type": "driver",
             "subType": "storage",
             "forModule": "nails/module-cdn",
+            "namespace": "Nails\\Cdn\\Driver\\",
             "data": {
                 "namespace": "Nails\\Cdn\\Driver\\",
-                "class": "Local",
-                "settings": [
-                        {
-                            "key": "path",
-                            "label": "Path",
-                            "info": "Where to store uploaded files; absolute path to relative to index.php",
-                            "default": "assets/uploads"
-                        },
-                        {
-                            "legend": "URLs",
-                            "fields": [
-                                {
-                                    "key": "uri_serve",
-                                    "label": "Serving URI",
-                                    "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl()</code>"
-                                },
-                                {
-                                    "key": "uri_serve_secure",
-                                    "label": "Serving URI (Secure)",
-                                    "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl()</code>"
-                                },
-                                {
-                                    "key": "uri_process",
-                                    "label": "Processing URI",
-                                    "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl()</code>"
-                                },
-                                {
-                                    "key": "uri_process_secure",
-                                    "label": "Processing URI (Secure)",
-                                    "default": "cdn",
-                                    "info": "Value will be passed into <code>siteUrl()</code>"
-                                }
-                            ]
-                        }
-                    ]
+                "class": "Local"
             },
             "scripts": {
                 "install": "./scripts/setup.sh"
