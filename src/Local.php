@@ -2,6 +2,7 @@
 
 namespace Nails\Cdn\Driver;
 
+use Nails\Cdn\Constants;
 use Nails\Cdn\Interfaces\Driver;
 use Nails\Common\Driver\Base;
 use Nails\Common\Exception\NailsException;
@@ -11,6 +12,11 @@ use Nails\Config;
 use Nails\Factory;
 use Nails\Functions;
 
+/**
+ * Class Local
+ *
+ * @package Nails\Cdn\Driver
+ */
 class Local extends Base implements Driver
 {
     use ErrorHandling;
@@ -439,8 +445,22 @@ class Local extends Base implements Driver
      *
      * @return  string
      */
-    public function urlPlaceholder($iWidth, $iHeight, $iBorder = 0)
+    public function urlPlaceholder(int $iWidth, int $iHeight, int $iBorder = 0)
     {
+        /** @var \Nails\Cdn\Service\Cdn $oCdn */
+        $oCdn = Factory::service('Cdn', Constants::MODULE_SLUG);
+
+        $sCacheFile = sprintf(
+            'placeholder-%sx%s-%s.png',
+            $iWidth,
+            $iHeight,
+            $iBorder
+        );
+
+        if ($oCdn->getCdnCache()->public()->exists($sCacheFile)) {
+            return $oCdn->getCdnCache()->public()->getUrl($sCacheFile);
+        }
+
         $sUrl = $this->urlPlaceholderScheme();
 
         //  Sub in the values
@@ -470,20 +490,35 @@ class Local extends Base implements Driver
     /**
      * Generates the correct URL for a blank avatar
      *
-     * @param int        $iWidth  The width fo the avatar
-     * @param int        $iHeight The height of the avatar§
-     * @param string|int $mSex    What gender the avatar should represent
+     * @param int    $iWidth  The width fo the avatar
+     * @param int    $iHeight The height of the avatar§
+     * @param string $sSex    What gender the avatar should represent
      *
      * @return string
      */
-    public function urlBlankAvatar($iWidth, $iHeight, $mSex = '')
+    public function urlBlankAvatar(int $iWidth, int $iHeight, string $sSex = '')
     {
+        /** @var \Nails\Cdn\Service\Cdn $oCdn */
+        $oCdn = Factory::service('Cdn', Constants::MODULE_SLUG);
+        $sSex = $oCdn->blankAvatarNormaliseSex($sSex);
+
+        $sCacheFile = sprintf(
+            'blank_avatar-%sx%s-%s.png',
+            $iWidth,
+            $iHeight,
+            $sSex
+        );
+
+        if ($oCdn->getCdnCache()->public()->exists($sCacheFile)) {
+            return $oCdn->getCdnCache()->public()->getUrl($sCacheFile);
+        }
+
         $sUrl = $this->urlBlankAvatarScheme();
 
         //  Sub in the values
         $sUrl = str_replace('{{width}}', $iWidth, $sUrl);
         $sUrl = str_replace('{{height}}', $iHeight, $sUrl);
-        $sUrl = str_replace('{{sex}}', $mSex, $sUrl);
+        $sUrl = str_replace('{{sex}}', $sSex, $sUrl);
 
         return $sUrl;
     }
