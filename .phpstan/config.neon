@@ -3,3 +3,7 @@ parameters:
     paths:
         - ../src
         - ../tests
+    scanFiles:
+        - ../vendor/nails/common/helpers/string.php
+        - ../vendor/nails/common/helpers/url.php
+        - ../vendor/nails/module-auth/helpers/user.php

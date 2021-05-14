@@ -38,11 +38,11 @@ class Local extends Base implements Driver
     /**
      * Returns the requested URI
      *
-     * @param $sUriType
+     * @param string $sUriType
      *
      * @return string
      */
-    protected function getUri($sUriType)
+    protected function getUri(string $sUriType): string
     {
         return siteUrl($this->getSetting('uri_' . $sUriType));
     }
@@ -233,7 +233,6 @@ class Local extends Base implements Driver
     public function bucketDestroy($sBucket)
     {
         //  @todo - consider the implications of bucket deletion; maybe prevent deletion of non-empty buckets
-        dumpanddie('@todo');
         try {
 
             if (!rmdir($this->getPath() . $sBucket)) {
@@ -282,8 +281,8 @@ class Local extends Base implements Driver
     /**
      * Generate the correct URL for serving a file direct from the file system
      *
-     * @param $sObject
-     * @param $sBucket
+     * @param string $sObject
+     * @param string $sBucket
      *
      * @return string
      */
@@ -369,8 +368,8 @@ class Local extends Base implements Driver
         $sExtension = strtolower(substr($sObject, strrpos($sObject, '.')));
 
         //  Sub in the values
-        $sUrl = str_replace('{{width}}', $iWidth, $sUrl);
-        $sUrl = str_replace('{{height}}', $iHeight, $sUrl);
+        $sUrl = str_replace('{{width}}', (string) $iWidth, $sUrl);
+        $sUrl = str_replace('{{height}}', (string) $iHeight, $sUrl);
         $sUrl = str_replace('{{bucket}}', $sBucket, $sUrl);
         $sUrl = str_replace('{{filename}}', $sFilename, $sUrl);
         $sUrl = str_replace('{{extension}}', $sExtension, $sUrl);
@@ -411,8 +410,8 @@ class Local extends Base implements Driver
         $sExtension = strtolower(substr($sObject, strrpos($sObject, '.')));
 
         //  Sub in the values
-        $sUrl = str_replace('{{width}}', $iWidth, $sUrl);
-        $sUrl = str_replace('{{height}}', $iHeight, $sUrl);
+        $sUrl = str_replace('{{width}}', (string) $iWidth, $sUrl);
+        $sUrl = str_replace('{{height}}', (string) $iHeight, $sUrl);
         $sUrl = str_replace('{{bucket}}', $sBucket, $sUrl);
         $sUrl = str_replace('{{filename}}', $sFilename, $sUrl);
         $sUrl = str_replace('{{extension}}', $sExtension, $sUrl);
@@ -464,9 +463,9 @@ class Local extends Base implements Driver
         $sUrl = $this->urlPlaceholderScheme();
 
         //  Sub in the values
-        $sUrl = str_replace('{{width}}', $iWidth, $sUrl);
-        $sUrl = str_replace('{{height}}', $iHeight, $sUrl);
-        $sUrl = str_replace('{{border}}', $iBorder, $sUrl);
+        $sUrl = str_replace('{{width}}', (string) $iWidth, $sUrl);
+        $sUrl = str_replace('{{height}}', (string) $iHeight, $sUrl);
+        $sUrl = str_replace('{{border}}', (string) $iBorder, $sUrl);
 
         return $sUrl;
     }
@@ -516,8 +515,8 @@ class Local extends Base implements Driver
         $sUrl = $this->urlBlankAvatarScheme();
 
         //  Sub in the values
-        $sUrl = str_replace('{{width}}', $iWidth, $sUrl);
-        $sUrl = str_replace('{{height}}', $iHeight, $sUrl);
+        $sUrl = str_replace('{{width}}', (string) $iWidth, $sUrl);
+        $sUrl = str_replace('{{height}}', (string) $iHeight, $sUrl);
         $sUrl = str_replace('{{sex}}', $sSex, $sUrl);
 
         return $sUrl;
@@ -563,7 +562,7 @@ class Local extends Base implements Driver
 
         //  Sub in the values
         $sUrl = str_replace('{{token}}', $sToken, $sUrl);
-        $sUrl = str_replace('{{download}}', $bForceDownload ? 1 : 0, $sUrl);
+        $sUrl = str_replace('{{download}}', $bForceDownload ? '1' : '0', $sUrl);
 
         return $sUrl;
     }

@@ -23,6 +23,9 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "require": {
+        "nails/module-cms": "dev-develop"
+    },
     "require-dev": {
         "phpunit/phpunit": "9.*",
         "phpstan/phpstan": "0.*"
