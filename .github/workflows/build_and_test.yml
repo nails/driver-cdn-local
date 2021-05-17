@@ -21,7 +21,7 @@ jobs:
                     restore-keys: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
 
             -   name: Install Composer dependencies
-                run: composer upate
+                run: composer update
 
             -   name: Run tests
                 run: composer test
