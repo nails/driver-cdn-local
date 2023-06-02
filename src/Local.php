@@ -205,7 +205,7 @@ class Local extends Base implements Driver
 
             if (!is_dir($sDir)) {
                 if (!@mkdir($sDir)) {
-                    if (isSuperuser()) {
+                    if (isSuperUser()) {
                         throw new NailsException(sprintf('Failed to create bucket directory (%s)', $sDir));
                     } else {
                         throw new NailsException('Failed to create bucket directory');
