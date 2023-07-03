@@ -273,7 +273,13 @@ class Local extends Base implements Driver
         $sUrl = str_replace('{{filename}}', $sFilename, $sUrl);
         $sUrl = str_replace('{{extension}}', $sExtension, $sUrl);
 
-        return $sUrl;
+        //  Check for env for CDN_URL override env
+        if (!empty($_ENV['CDN_URL'])) {
+            return str_replace('localhost', $_ENV['CDN_URL'], $sUrl); // Local dev hack
+        } else {
+            // return $sUrl
+            return $sUrl;
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -374,7 +380,13 @@ class Local extends Base implements Driver
         $sUrl = str_replace('{{filename}}', $sFilename, $sUrl);
         $sUrl = str_replace('{{extension}}', $sExtension, $sUrl);
 
-        return $sUrl;
+        //  Check for env for CDN_URL override env
+        if (!empty($_ENV['CDN_URL'])) {
+            return str_replace('localhost', $_ENV['CDN_URL'], $sUrl); // Local dev hack
+        } else {
+            // return $sUrl
+            return $sUrl;
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -416,7 +428,13 @@ class Local extends Base implements Driver
         $sUrl = str_replace('{{filename}}', $sFilename, $sUrl);
         $sUrl = str_replace('{{extension}}', $sExtension, $sUrl);
 
-        return $sUrl;
+        //  Check for env for CDN_URL override env
+        if (!empty($_ENV['CDN_URL'])) {
+            return str_replace('localhost', $_ENV['CDN_URL'], $sUrl); // Local dev hack
+        } else {
+            // return $sUrl
+            return $sUrl;
+        }
     }
 
     // --------------------------------------------------------------------------
