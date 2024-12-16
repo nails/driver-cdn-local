@@ -143,8 +143,8 @@ class Local extends Base implements Driver
     {
         try {
 
-            $sObject = urldecode($sObject);
-            $sBucket = urldecode($sBucket);
+            $sObject = urldecode((string) $sObject);
+            $sBucket = urldecode((string) $sBucket);
 
             if (file_exists($this->getPath() . $sBucket . '/' . $sObject)) {
                 if (!@unlink($this->getPath() . $sBucket . '/' . $sObject)) {
