@@ -1,6 +1,7 @@
 {
     "name": "nails/driver-cdn-local",
-    "keywords": [
+    "keywords":
+    [
         "Nails",
         "Shed Collective",
         "CodeIgniter",
@@ -10,7 +11,8 @@
     "homepage": "http://nailsapp.co.uk/modules/cdn/driver/awslocal",
     "description": "This is the \"Local\" driver for the Nails CDN module.",
     "license": "MIT",
-    "authors": [
+    "authors":
+    [
         {
             "name": "Pablo de la Pena",
             "email": "p@nailsapp.co.uk",
@@ -18,40 +20,50 @@
             "role": "Developer"
         }
     ],
-    "support": {
+    "support":
+    {
         "email": "hello@nailsapp.co.uk"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "require": {
-        "nails/module-cdn": "dev-feature/pre-new-admin-ci-php8"
+    "require":
+    {
+        "nails/module-cdn": "dev-feature/pre-new-admin"
     },
-    "require-dev": {
+    "require-dev":
+    {
         "phpunit/phpunit": "9.*",
         "phpstan/phpstan": "1.*"
     },
-    "scripts": {
+    "scripts":
+    {
         "test": "./vendor/bin/phpunit",
         "analyse": "./vendor/bin/phpstan analyse -c .phpstan/config.neon"
     },
-    "autoload": {
-        "psr-4": {
+    "autoload":
+    {
+        "psr-4":
+        {
             "Nails\\Cdn\\Driver\\": "src/",
             "Nails\\Cdn\\Driver\\Local\\": "src/Local/"
         }
     },
-    "extra": {
-        "nails": {
+    "extra":
+    {
+        "nails":
+        {
             "name": "Local",
             "type": "driver",
             "subType": "storage",
             "forModule": "nails/module-cdn",
             "namespace": "Nails\\Cdn\\Driver\\Local\\",
-            "data": {
+            "data":
+            {
                 "namespace": "Nails\\Cdn\\Driver\\",
                 "class": "Local"
             },
-            "scripts": {
+            "scripts":
+            {
                 "install": "./scripts/setup.sh"
             }
         }
