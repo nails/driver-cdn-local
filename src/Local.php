@@ -133,14 +133,14 @@ class Local extends Base implements Driver
 
     public function objectMove($sObject, $sBucket)
     {
-        throw new DriverException('The Local CDN driver does not support moving objects.');
+        throw new \Exception('The Local CDN driver does not support moving objects.');
     }
 
     // --------------------------------------------------------------------------
 
     public function objectCopy($sObject, $sBucket)
     {
-        throw new DriverException('The Local CDN driver does not support copying objects.');
+        throw new \Exception('The Local CDN driver does not support copying objects.');
     }
 
     // --------------------------------------------------------------------------
