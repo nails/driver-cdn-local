@@ -28,6 +28,7 @@
     "prefer-stable": true,
     "require":
     {
+        "php": ">=8",
         "nails/module-cdn": "dev-feature/pre-new-admin"
     },
     "require-dev":
