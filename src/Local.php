@@ -2,15 +2,20 @@
 
 namespace Nails\Cdn\Driver;
 
+use Exception;
 use Nails\Cdn\Constants;
 use Nails\Cdn\Interfaces\Driver;
+use Nails\Cdn\Service\Cdn;
 use Nails\Common\Driver\Base;
+use Nails\Common\Exception\EnvironmentException;
+use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\NailsException;
 use Nails\Common\Service\Encrypt;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Config;
 use Nails\Factory;
 use Nails\Functions;
+use stdClass;
 
 /**
  * Class Local
@@ -25,10 +30,8 @@ class Local extends Base implements Driver
 
     /**
      * Returns the path to the local upload directory
-     *
-     * @return string
      */
-    protected function getPath()
+    protected function getPath(): string
     {
         return addTrailingSlash($this->getSetting('path'));
     }
@@ -37,10 +40,6 @@ class Local extends Base implements Driver
 
     /**
      * Returns the requested URI
-     *
-     * @param string $sUriType
-     *
-     * @return string
      */
     protected function getUri(string $sUriType): string
     {
@@ -56,17 +55,15 @@ class Local extends Base implements Driver
     /**
      * Creates a new object
      *
-     * @param \stdClass $data Data to create the object with
-     *
-     * @return bool
+     * @param stdClass $oData Data to create the object with
      */
-    public function objectCreate($data)
+    public function objectCreate(stdClass $oData): bool
     {
         try {
 
-            $sBucket     = !empty($data->bucket->slug) ? $data->bucket->slug : '';
-            $sFilename   = !empty($data->filename) ? $data->filename : '';
-            $sSource     = !empty($data->file) ? $data->file : '';
+            $sBucket     = !empty($oData->bucket->slug) ? $oData->bucket->slug : '';
+            $sFilename   = !empty($oData->filename) ? $oData->filename : '';
+            $sSource     = !empty($oData->file) ? $oData->file : '';
             $sBucketPath = $this->getPath() . $sBucket;
 
             // --------------------------------------------------------------------------
@@ -75,7 +72,6 @@ class Local extends Base implements Driver
             if (!is_dir($sBucketPath)) {
                 //  Hmm, not writable, can we create it?
                 if (!@mkdir($sBucketPath)) {
-                    //  Nope, failed to create the directory - we iz gonna have problems if we continue, innit.
                     throw new NailsException(
                         sprintf(
                             'The target directory does not exist and could not be created (%s)',
@@ -108,7 +104,7 @@ class Local extends Base implements Driver
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->setError('LOCAL EXCEPTION: [objectCreate]: ' . $e->getMessage());
             return false;
         }
@@ -121,26 +117,69 @@ class Local extends Base implements Driver
      *
      * @param string $sFilename The object's filename
      * @param string $sBucket   The bucket's slug
-     *
-     * @return bool
      */
-    public function objectExists($sFilename, $sBucket)
+    public function objectExists(string $sFilename, string $sBucket): bool
     {
-        return file_exists($this->getPath() . $sBucket . '/' . $sFilename);
+        try {
+
+            return file_exists($this->getPath() . $sBucket . '/' . $sFilename);
+
+        } catch (\Exception $e) {
+            $this->setError('LOCAL EXCEPTION: [objectExists]: ' . $e->getMessage());
+            return false;
+        }
     }
 
     // --------------------------------------------------------------------------
 
-    public function objectMove($sObject, $sBucket)
-    {
-        throw new \Exception('The Local CDN driver does not support moving objects.');
+    /**
+     * Move an object
+     *
+     * @param string $sSourceObject The source object's filename
+     * @param string $sSourceBucket The source bucket's slug
+     * @param string $sTargetObject The target object's filename
+     * @param string $sTargetBucket The target bucket's slug
+     */
+    public function objectMove(
+        string $sSourceObject,
+        string $sSourceBucket,
+        string $sTargetObject,
+        string $sTargetBucket
+    ): bool {
+        try {
+
+            throw new Exception('The Local CDN driver does not support moving objects.');
+
+        } catch (Exception $e) {
+            $this->setError('LOCAL EXCEPTION: [objectMove]: ' . $e->getMessage());
+            return false;
+        }
     }
 
     // --------------------------------------------------------------------------
 
-    public function objectCopy($sObject, $sBucket)
-    {
-        throw new \Exception('The Local CDN driver does not support copying objects.');
+    /**
+     * Copy an object
+     *
+     * @param string $sSourceObject The source object's filename
+     * @param string $sSourceBucket The source bucket's slug
+     * @param string $sTargetObject The target object's filename
+     * @param string $sTargetBucket The target bucket's slug
+     */
+    public function objectCopy(
+        string $sSourceObject,
+        string $sSourceBucket,
+        string $sTargetObject,
+        string $sTargetBucket
+    ): bool {
+        try {
+
+            throw new Exception('The Local CDN driver does not support copying objects.');
+
+        } catch (Exception $e) {
+            $this->setError('LOCAL EXCEPTION: [objectCopy]: ' . $e->getMessage());
+            return false;
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -150,15 +189,13 @@ class Local extends Base implements Driver
      *
      * @param string $sObject The object's filename
      * @param string $sBucket The bucket's slug
-     *
-     * @return bool
      */
-    public function objectDestroy($sObject, $sBucket)
+    public function objectDestroy(string $sObject, string $sBucket): bool
     {
         try {
 
-            $sObject = urldecode((string) $sObject);
-            $sBucket = urldecode((string) $sBucket);
+            $sObject = urldecode($sObject);
+            $sBucket = urldecode($sBucket);
 
             if (file_exists($this->getPath() . $sBucket . '/' . $sObject)) {
                 if (!@unlink($this->getPath() . $sBucket . '/' . $sObject)) {
@@ -170,7 +207,7 @@ class Local extends Base implements Driver
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->setError('LOCAL EXCEPTION: [objectDestroy]: ' . $e->getMessage());
             return false;
         }
@@ -184,9 +221,9 @@ class Local extends Base implements Driver
      * @param string $sBucket   The bucket's slug
      * @param string $sFilename The filename
      *
-     * @return mixed             String on success, false on failure
+     * @return bool|string String on success, false on failure
      */
-    public function objectLocalPath($sBucket, $sFilename)
+    public function objectLocalPath(string $sBucket, string $sFilename): bool|string
     {
         $sPath = $this->getPath() . $sBucket . '/' . $sFilename;
 
@@ -208,10 +245,8 @@ class Local extends Base implements Driver
      * Creates a new bucket
      *
      * @param string $sBucket The bucket's slug
-     *
-     * @return bool
      */
-    public function bucketCreate($sBucket)
+    public function bucketCreate(string $sBucket): bool
     {
         try {
 
@@ -219,7 +254,7 @@ class Local extends Base implements Driver
 
             if (!is_dir($sDir)) {
                 if (!@mkdir($sDir)) {
-                    if (isSuperUser()) {
+                    if (isSuperuser()) {
                         throw new NailsException(sprintf('Failed to create bucket directory (%s)', $sDir));
                     } else {
                         throw new NailsException('Failed to create bucket directory');
@@ -229,7 +264,7 @@ class Local extends Base implements Driver
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->setError('LOCAL-SDK EXCEPTION: [bucketCreate]: ' . $e->getMessage());
             return false;
         }
@@ -241,10 +276,8 @@ class Local extends Base implements Driver
      * Deletes an existing bucket
      *
      * @param string $sBucket The bucket's slug
-     *
-     * @return bool
      */
-    public function bucketDestroy($sBucket)
+    public function bucketDestroy(string $sBucket): bool
     {
         //  @todo - consider the implications of bucket deletion; maybe prevent deletion of non-empty buckets
         try {
@@ -255,7 +288,7 @@ class Local extends Base implements Driver
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->setError('LOCAL-SDK ERROR: ' . $e->getMessage());
             return false;
         }
@@ -273,10 +306,8 @@ class Local extends Base implements Driver
      * @param string $sObject        The object to serve
      * @param string $sBucket        The bucket to serve from
      * @param bool   $bForceDownload Whether to force a download
-     *
-     * @return string
      */
-    public function urlServe($sObject, $sBucket, $bForceDownload = false)
+    public function urlServe(string $sObject, string $sBucket, bool $bForceDownload = false): string
     {
         $sUrl       = $this->urlServeScheme($bForceDownload);
         $sFilename  = strtolower(substr($sObject, 0, strrpos($sObject, '.')));
@@ -295,12 +326,10 @@ class Local extends Base implements Driver
     /**
      * Generate the correct URL for serving a file direct from the file system
      *
-     * @param string $sObject
-     * @param string $sBucket
-     *
-     * @return string
+     * @param string $sObject The object's filename
+     * @param string $sBucket The bucket's slug
      */
-    public function urlServeRaw($sObject, $sBucket)
+    public function urlServeRaw(string $sObject, string $sBucket): string
     {
         $sUrl = 'assets/uploads/' . $sBucket . '/' . $sObject;
         return $this->urlMakeSecure($sUrl, false);
@@ -311,14 +340,11 @@ class Local extends Base implements Driver
     /**
      * Returns the scheme of 'serve' URLs
      *
-     * @param bool $bForceDownload Whether or not to force download
-     *
-     * @return string
+     * @param bool $bForceDownload Whether to force download
      */
-    public function urlServeScheme($bForceDownload = false)
+    public function urlServeScheme(bool $bForceDownload = false): string
     {
         $sUrl = $this->getUri('serve') . '/serve/{{bucket}}/{{filename}}{{extension}}';
-
         if ($bForceDownload) {
             $sUrl .= '?dl=1';
         }
@@ -331,13 +357,11 @@ class Local extends Base implements Driver
     /**
      * Generates a URL for serving zipped objects
      *
-     * @param string $sObjectIds A comma separated list of object IDs
+     * @param string $sObjectIds A comma-separated list of object IDs
      * @param string $sHash      The security hash
      * @param string $sFilename  The filename to give the zip file
-     *
-     * @return string
      */
-    public function urlServeZipped($sObjectIds, $sHash, $sFilename)
+    public function urlServeZipped(string $sObjectIds, string $sHash, string $sFilename): string
     {
         $sUrl = $this->urlServeZippedScheme();
 
@@ -356,7 +380,7 @@ class Local extends Base implements Driver
      *
      * @return  string
      */
-    public function urlServeZippedScheme()
+    public function urlServeZippedScheme(): string
     {
         return $this->urlMakeSecure(
             $this->getUri('process') . '/zip/{{ids}}/{{hash}}/{{filename}}'
@@ -372,10 +396,8 @@ class Local extends Base implements Driver
      * @param string $sObject The filename of the image we're cropping
      * @param int    $iWidth  The width of the cropped image
      * @param int    $iHeight The height of the cropped image
-     *
-     * @return  string
      */
-    public function urlCrop($sObject, $sBucket, $iWidth, $iHeight)
+    public function urlCrop(string $sObject, string $sBucket, int $iWidth, int $iHeight): string
     {
         $sUrl       = $this->urlCropScheme();
         $sFilename  = strtolower(substr($sObject, 0, strrpos($sObject, '.')));
@@ -395,10 +417,8 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'crop' urls
-     *
-     * @return  string
      */
-    public function urlCropScheme()
+    public function urlCropScheme(): string
     {
         return $this->urlMakeSecure(
             $this->getUri('process') . '/crop/{{width}}/{{height}}/{{bucket}}/{{filename}}{{extension}}'
@@ -414,10 +434,8 @@ class Local extends Base implements Driver
      * @param string $sObject The filename of the image we're 'scaling'
      * @param int    $iWidth  The width of the scaled image
      * @param int    $iHeight The height of the scaled image
-     *
-     * @return  string
      */
-    public function urlScale($sObject, $sBucket, $iWidth, $iHeight)
+    public function urlScale(string $sObject, string $sBucket, int $iWidth, int $iHeight): string
     {
         $sUrl       = $this->urlScaleScheme();
         $sFilename  = strtolower(substr($sObject, 0, strrpos($sObject, '.')));
@@ -437,10 +455,8 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'scale' urls
-     *
-     * @return  string
      */
-    public function urlScaleScheme()
+    public function urlScaleScheme(): string
     {
         return $this->urlMakeSecure(
             $this->getUri('process') . '/scale/{{width}}/{{height}}/{{bucket}}/{{filename}}{{extension}}'
@@ -456,11 +472,11 @@ class Local extends Base implements Driver
      * @param int $iHeight The height of the placeholder
      * @param int $iBorder The width of the border round the placeholder
      *
-     * @return  string
+     * @throws FactoryException
      */
-    public function urlPlaceholder(int $iWidth, int $iHeight, int $iBorder = 0)
+    public function urlPlaceholder(int $iWidth, int $iHeight, int $iBorder = 0): string
     {
-        /** @var \Nails\Cdn\Service\Cdn $oCdn */
+        /** @var Cdn $oCdn */
         $oCdn = Factory::service('Cdn', Constants::MODULE_SLUG);
 
         $sCacheFile = sprintf(
@@ -488,10 +504,8 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'placeholder' urls
-     *
-     * @return  string
      */
-    public function urlPlaceholderScheme()
+    public function urlPlaceholderScheme(): string
     {
         return $this->urlMakeSecure(
             $this->getUri('process') . '/placeholder/{{width}}/{{height}}/{{border}}'
@@ -507,11 +521,11 @@ class Local extends Base implements Driver
      * @param int    $iHeight The height of the avatar§
      * @param string $sSex    What gender the avatar should represent
      *
-     * @return string
+     * @throws FactoryException
      */
-    public function urlBlankAvatar(int $iWidth, int $iHeight, string $sSex = '')
+    public function urlBlankAvatar(int $iWidth, int $iHeight, string $sSex = ''): string
     {
-        /** @var \Nails\Cdn\Service\Cdn $oCdn */
+        /** @var Cdn $oCdn */
         $oCdn = Factory::service('Cdn', Constants::MODULE_SLUG);
         $sSex = $oCdn->blankAvatarNormaliseSex($sSex);
 
@@ -540,10 +554,8 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'blank_avatar' urls
-     *
-     * @return  string
      */
-    public function urlBlankAvatarScheme()
+    public function urlBlankAvatarScheme(): string
     {
         return $this->urlMakeSecure(
             $this->getUri('process') . '/blank_avatar/{{width}}/{{height}}/{{sex}}'
@@ -560,9 +572,10 @@ class Local extends Base implements Driver
      * @param int    $iExpires       The length of time the URL should be valid for, in seconds
      * @param bool   $bForceDownload Whether to force a download
      *
-     * @return string
+     * @throws FactoryException
+     * @throws EnvironmentException
      */
-    public function urlExpiring($sObject, $sBucket, $iExpires, $bForceDownload = false)
+    public function urlExpiring(string $sObject, string $sBucket, int $iExpires, bool $bForceDownload = false): string
     {
         $sUrl = $this->urlExpiringScheme();
         /** @var Encrypt $oEncrypt */
@@ -585,10 +598,8 @@ class Local extends Base implements Driver
 
     /**
      * Returns the scheme of 'expiring' urls
-     *
-     * @return  string
      */
-    public function urlExpiringScheme()
+    public function urlExpiringScheme(): string
     {
         return $this->urlMakeSecure(
             $this->getUri('process') . '/serve?token={{token}}&dl={{download}}'
@@ -602,10 +613,8 @@ class Local extends Base implements Driver
      *
      * @param string $sUrl          The URL to secure
      * @param bool   $bIsProcessing Whether it's a processing type URL
-     *
-     * @return string
      */
-    protected function urlMakeSecure($sUrl, $bIsProcessing = true)
+    protected function urlMakeSecure(string $sUrl, bool $bIsProcessing = true): string
     {
         if (Functions::isPageSecure()) {
             if ($bIsProcessing) {
