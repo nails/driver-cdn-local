@@ -2,20 +2,21 @@
 
 namespace Nails\Cdn\Driver;
 
-use Exception;
 use Nails\Cdn\Constants;
+use Nails\Cdn\Exception\DriverException;
 use Nails\Cdn\Interfaces\Driver;
 use Nails\Cdn\Service\Cdn;
 use Nails\Common\Driver\Base;
 use Nails\Common\Exception\EnvironmentException;
 use Nails\Common\Exception\FactoryException;
-use Nails\Common\Exception\NailsException;
+use Nails\Common\Helper\File;
 use Nails\Common\Service\Encrypt;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Config;
 use Nails\Factory;
 use Nails\Functions;
 use stdClass;
+use Throwable;
 
 /**
  * Class Local
@@ -61,50 +62,24 @@ class Local extends Base implements Driver
     {
         try {
 
-            $sBucket     = !empty($oData->bucket->slug) ? $oData->bucket->slug : '';
-            $sFilename   = !empty($oData->filename) ? $oData->filename : '';
-            $sSource     = !empty($oData->file) ? $oData->file : '';
-            $sBucketPath = $this->getPath() . $sBucket;
+            $sBucket   = !empty($oData->bucket->slug) ? $oData->bucket->slug : '';
+            $sFilename = !empty($oData->filename) ? $oData->filename : '';
+            $sSource   = !empty($oData->file) ? $oData->file : '';
 
             // --------------------------------------------------------------------------
 
-            //  Check directory exists
-            if (!is_dir($sBucketPath)) {
-                //  Hmm, not writable, can we create it?
-                if (!@mkdir($sBucketPath)) {
-                    throw new NailsException(
-                        sprintf(
-                            'The target directory does not exist and could not be created (%s)',
-                            $sBucketPath
-                        )
-                    );
-                }
-            }
-
-            // --------------------------------------------------------------------------
-
-            //  Check bucket is writable
-            if (!is_writable($sBucketPath)) {
-                throw new NailsException(
-                    sprintf(
-                        'The target directory is not writable (%s)',
-                        $sBucketPath
-                    )
-                );
-            }
-
-            //  Move the file
+            $sBucketPath  = $this->createBucketDir($sBucket);
             $sDestination = $sBucketPath . '/' . $sFilename;
 
             if (!@move_uploaded_file($sSource, $sDestination)) {
                 if (!@copy($sSource, $sDestination)) {
-                    throw new NailsException('Failed to move uploaded file into the bucket');
+                    throw new DriverException('Failed to move uploaded file into the bucket');
                 }
             }
 
             return true;
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->setError('LOCAL EXCEPTION: [objectCreate]: ' . $e->getMessage());
             return false;
         }
@@ -124,7 +99,7 @@ class Local extends Base implements Driver
 
             return file_exists($this->getPath() . $sBucket . '/' . $sFilename);
 
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             $this->setError('LOCAL EXCEPTION: [objectExists]: ' . $e->getMessage());
             return false;
         }
@@ -148,9 +123,19 @@ class Local extends Base implements Driver
     ): bool {
         try {
 
-            throw new Exception('The Local CDN driver does not support moving objects.');
+            $sSourcePath = sprintf('%s%s/%s', $this->getPath(), $sSourceBucket, $sSourceObject);
+            $sTargetPath = sprintf('%s%s/%s', $this->getPath(), $sTargetBucket, $sTargetObject);
 
-        } catch (Exception $e) {
+            $this->checkSourceAndTarget($sSourcePath, $sTargetPath);
+            $this->createBucketDir($sTargetBucket);
+
+            if (!rename($sSourcePath, $sTargetPath)) {
+                throw new DriverException('Failed to rename file.');
+            }
+
+            return true;
+
+        } catch (Throwable $e) {
             $this->setError('LOCAL EXCEPTION: [objectMove]: ' . $e->getMessage());
             return false;
         }
@@ -174,11 +159,45 @@ class Local extends Base implements Driver
     ): bool {
         try {
 
-            throw new Exception('The Local CDN driver does not support copying objects.');
+            $sSourcePath = sprintf('%s%s/%s', $this->getPath(), $sSourceBucket, $sSourceObject);
+            $sTargetPath = sprintf('%s%s/%s', $this->getPath(), $sTargetBucket, $sTargetObject);
 
-        } catch (Exception $e) {
+            $this->checkSourceAndTarget($sSourcePath, $sTargetPath);
+            $this->createBucketDir($sTargetBucket);
+
+            if (!copy($sSourcePath, $sTargetPath)) {
+                throw new DriverException('Failed to copy file.');
+            }
+
+            return true;
+
+        } catch (Throwable $e) {
             $this->setError('LOCAL EXCEPTION: [objectCopy]: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * @throws DriverException
+     */
+    protected function checkSourceAndTarget(string $sSourcePath, string $sTargetPath): void
+    {
+        if (!File::fileExistsCS($sSourcePath)) {
+            if (isSuperuser()) {
+                throw new DriverException(sprintf('Source file (%s) does not exist.', $sSourcePath));
+            } else {
+                throw new DriverException('Source file does not exist.');
+            }
+        }
+
+        if (File::fileExistsCS($sTargetPath)) {
+            if (isSuperuser()) {
+                throw new DriverException(sprintf('Target file (%s) already exists.', $sTargetPath));
+            } else {
+                throw new DriverException('Target file already exists.');
+            }
         }
     }
 
@@ -199,15 +218,15 @@ class Local extends Base implements Driver
 
             if (file_exists($this->getPath() . $sBucket . '/' . $sObject)) {
                 if (!@unlink($this->getPath() . $sBucket . '/' . $sObject)) {
-                    throw new NailsException('File failed to delete, it may be in use');
+                    throw new DriverException('File failed to delete, it may be in use');
                 }
             } else {
-                throw new NailsException('No file to delete');
+                throw new DriverException('No file to delete');
             }
 
             return true;
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->setError('LOCAL EXCEPTION: [objectDestroy]: ' . $e->getMessage());
             return false;
         }
@@ -250,21 +269,10 @@ class Local extends Base implements Driver
     {
         try {
 
-            $sDir = $this->getPath() . $sBucket;
-
-            if (!is_dir($sDir)) {
-                if (!@mkdir($sDir)) {
-                    if (isSuperuser()) {
-                        throw new NailsException(sprintf('Failed to create bucket directory (%s)', $sDir));
-                    } else {
-                        throw new NailsException('Failed to create bucket directory');
-                    }
-                }
-            }
-
+            $this->createBucketDir($sBucket);
             return true;
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->setError('LOCAL-SDK EXCEPTION: [bucketCreate]: ' . $e->getMessage());
             return false;
         }
@@ -283,12 +291,12 @@ class Local extends Base implements Driver
         try {
 
             if (!rmdir($this->getPath() . $sBucket)) {
-                throw new NailsException('Failed to destroy bucket');
+                throw new DriverException('Failed to destroy bucket');
             }
 
             return true;
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->setError('LOCAL-SDK ERROR: ' . $e->getMessage());
             return false;
         }
@@ -628,5 +636,45 @@ class Local extends Base implements Driver
         }
 
         return preg_match('#^https?://#', $sUrl) ? $sUrl : siteUrl($sUrl);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Ensures the bucket directory exists and is writable
+     *
+     * @throws DriverException
+     */
+    protected function createBucketDir(string $bucket): string
+    {
+        $path = $this->getPath() . $bucket;
+
+        if (!is_dir($path)) {
+            if (!@mkdir($path)) {
+                if (isSuperuser()) {
+                    throw new DriverException(
+                        sprintf('The target directory does not exist and could not be created (%s)', $path)
+                    );
+                } else {
+                    throw new DriverException(
+                        'Failed to create bucket directory'
+                    );
+                }
+            }
+        }
+
+        if (!is_writable($path)) {
+            if (isSuperuser()) {
+                throw new DriverException(
+                    sprintf('The target directory is not writable (%s)', $path)
+                );
+            } else {
+                throw new DriverException(
+                    'Failed to create bucket directory'
+                );
+            }
+        }
+
+        return $path;
     }
 }
