@@ -257,6 +257,28 @@ class Local extends Base implements Driver
     // --------------------------------------------------------------------------
 
     /**
+     * Determines whether an object's meta data is set correctly or not
+     *
+     * @param string $sFilename        The object's filename
+     * @param string $sFilenameDisplay The object's human-friendly name
+     * @param string $sBucket          The bucket's slug
+     * @param string $sMimeType        The object's mime type
+     *
+     * @return string[]
+     */
+    public function getObjectMetaDataErrors(
+        string $sFilename,
+        string $sFilenameDisplay,
+        string $sBucket,
+        string $sMimeType
+    ): array {
+        //  No metadata is set using this driver
+        return [];
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * BUCKET METHODS
      */
 
