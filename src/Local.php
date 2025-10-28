@@ -301,6 +301,28 @@ class Local extends Base implements Driver
     // --------------------------------------------------------------------------
 
     /**
+     * Invalidate a given object from caches
+     */
+    public function objectInvalidate(string $sFilename, string $sBucket): bool
+    {
+        //  Nothing to do here, satisfying interface
+        return true;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Rename a given object in storage
+     */
+    public function objectRename(string $sFilename, string $sBucket, string $sFilenameDisplay, string $sMimeType): bool
+    {
+        //  Nothing to do here, satisfying interface
+        return true;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * BUCKET METHODS
      */
 
