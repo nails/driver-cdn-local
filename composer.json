@@ -41,6 +41,11 @@
             "Nails\\Cdn\\Driver\\Local\\": "src/Local/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Cdn\\Driver\\": "tests/"
+        }
+    },
     "extra": {
         "nails": {
             "name": "Local",

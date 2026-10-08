@@ -220,8 +220,6 @@ class Local extends Base implements Driver
                 if (!@unlink($this->getPath() . $sBucket . '/' . $sObject)) {
                     throw new DriverException('File failed to delete, it may be in use');
                 }
-            } else {
-                throw new DriverException('No file to delete');
             }
 
             return true;
